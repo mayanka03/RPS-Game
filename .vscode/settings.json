@@ -1,0 +1,22 @@
+{
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "AABB",
+        "cand",
+        "imread",
+        "imshow",
+        "imwrite",
+        "mediapipe",
+        "mpath",
+        "numpy",
+        "opencv",
+        "overlaylist",
+        "pycache",
+        "pygame",
+        "venv"
+    ]
+}
