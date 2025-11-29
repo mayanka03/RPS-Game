@@ -1,12 +1,13 @@
-import cv2
+import cv2 # pyright: ignore[reportMissingImports]
 import os
 import time
-import pygame
-import Hand_Detector
+import pygame # pyright: ignore[reportMissingImports]
+import hand_detector as hand_detector
 import RPSGame
 import sys
-import numpy as np
+import numpy as np # pyright: ignore[reportMissingImports]
 from generate_assets import make_image
+from contextlib import suppress
 
 def Run():
     pygame.init()
@@ -16,13 +17,10 @@ def Run():
         return os.path.join(BASE_DIR, 'images', name)
     def music_path(name):
         return os.path.join(BASE_DIR, 'music', name)
-
     # Optional --wait flag to allow user to bring windows forward
     if '--wait' in sys.argv:
-        try:
+        with suppress(Exception):
             input('[RPS] --wait given: press Enter when ready to start (bring camera/window forward)')
-        except Exception:
-            pass
 
     # Try loading music if available
     try:
@@ -36,7 +34,7 @@ def Run():
         print('[RPS] Warning: failed to load/play music:', e)
 
     pTime = 0
-    detector = Hand_Detector.handDetector(detectionCon=0.75)
+    detector = hand_detector.handDetector(detectionCon=0.75)
     wCam, hCam = 640,480
     cap = cv2.VideoCapture(0)
     cap.set(3,wCam)
@@ -130,7 +128,7 @@ def Run():
         def intersects(a, b):
             ax,ay,aw,ah = a
             bx,by,bw,bh = b
-            return not (ax+aw <= bx or bx+bw <= ax or ay+ah <= by or by+bh <= ay)
+            return ax+aw > bx and bx+bw > ax and ay+ah > by and by+bh > ay
 
         chosen = candidates[0]
         overlayRect = (chosen[0], chosen[1], wO, hO)
@@ -161,6 +159,8 @@ def Run():
             if len(myList) !=0 :
                 try:
                     fingers = detector.fingersUp(myList, handNo=0)
+                    cnt = sum(fingers)
+
                     # default to rock
                     player_choice = 1
                     det_text = 'Rock'
@@ -168,9 +168,8 @@ def Run():
                         player_choice = 1
                         det_text = 'Rock'
                     else:
-                        cnt = sum(1 for f in fingers if f)
                         # all five fingers up -> paper
-                        if cnt == 5:
+                        if all(fingers): 
                             player_choice = 2
                             det_text = 'Paper'
                         # index + middle -> scissor
@@ -178,12 +177,12 @@ def Run():
                             player_choice = 3
                             det_text = 'Scissor'
                         # no fingers -> rock
-                        elif cnt == 0:
+                        elif cnt == 0: # pyright: ignore[reportUndefinedVariable]
                             player_choice = 1
                             det_text = 'Rock'
                         else:
                             # fallback heuristics
-                            if cnt >= 3:
+                            if cnt >= 3: # pyright: ignore[reportUndefinedVariable]
                                 player_choice = 2
                                 det_text = 'Paper'
                             else:
@@ -205,11 +204,9 @@ def Run():
             cv2.putText(img,status,(250,250),cv2.FONT_HERSHEY_COMPLEX,2.5,(36,255,12),6)                  
         elif(count==70):
             count=0           
-        z=str(computer_score)
-        st="Computer Score : "+z
+        st=f"Computer Score : {computer_score}"
         cv2.putText(img,st,(30,440),cv2.FONT_HERSHEY_PLAIN,1.5,(255,0,0),2)
-        z=str(player_score)
-        st="Player Score "+z
+        st=f"Player Score {player_score}"
         cv2.putText(img,st,(430,440),cv2.FONT_HERSHEY_PLAIN,1.5,(255,0,0),2)
         cTime = time.time() 
         fps = 1/(cTime-pTime) if (cTime-pTime)>0 else 0

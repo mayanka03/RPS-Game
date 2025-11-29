@@ -1,5 +1,5 @@
 import cv2
-import mediapipe as mp
+import mediapipe as mp # pyright: ignore[reportMissingImports]
 
 class handDetector:
     def __init__(self, mode=False, maxHands=1, detectionCon=0.5, trackCon=0.5):
